@@ -20,7 +20,11 @@ interface CommonProps {
 }
 
 interface _W {
-    myString: string;
+    objectCategorizes: ObjectCategorizesType[];
+    entityLegend: string;
+    attrLegend: string;
+    attrItem: string;
+    entityItem: string;
 }
 
 export interface RadarContainerProps extends CommonProps, _W {}
@@ -33,4 +37,12 @@ export interface RadarPreviewProps extends _W {
 
 export interface VisibilityMap {
     [P in _W]: boolean;
+}
+
+export interface ObjectCategorizesType {
+    Title: string;
+}
+
+export interface ObjectCategorizesVisibilityType {
+    Title: boolean;
 }

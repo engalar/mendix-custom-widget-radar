@@ -38,7 +38,7 @@ export default function Radar(props: RadarContainerProps) {
     });
 
     return <Observer>{() =>
-        <div style={parseStyle(props.style)}>
+        <div className={props.class} style={parseStyle(props.style)}>
             <RadarComponent store={store} />
         </div>}</Observer>;
 }

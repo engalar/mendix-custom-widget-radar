@@ -1,31 +1,8 @@
 import { createElement, useEffect, useRef } from "react";
-import DataSet from '@antv/data-set';
 import { Chart } from '@antv/g2';
 
 import { Store } from "../store";
-
-
-
-const data = [
-    { item: 'Design', a: 70, b: 30 },
-    { item: 'Development', a: 60, b: 70 },
-    { item: 'Marketing', a: 50, b: 60 },
-    { item: 'Users', a: 40, b: 50 },
-    { item: 'Test', a: 60, b: 70 },
-    { item: 'Language', a: 70, b: 50 },
-    { item: 'Technology', a: 50, b: 40 },
-    { item: 'Support', a: 30, b: 40 },
-    { item: 'Sales', a: 60, b: 40 },
-    { item: 'UX', a: 50, b: 60 },
-];
-const { DataView } = DataSet;
-const dv = new DataView().source(data);
-dv.transform({
-    type: 'fold',
-    fields: ['a', 'b'], // 展开字段集
-    key: 'user', // key字段
-    value: 'score', // value字段
-});
+import { autorun } from "mobx";
 
 
 export interface RadarComponentProps {
@@ -33,8 +10,8 @@ export interface RadarComponentProps {
 }
 
 export function RadarComponent(props: RadarComponentProps) {
-    console.log(props);
-    
+
+
     const ref = useRef<any>();
     useEffect(() => {
         const chart = new Chart({
@@ -42,11 +19,10 @@ export function RadarComponent(props: RadarComponentProps) {
             autoFit: true,
             height: 500,
         });
-        chart.data(dv.rows);
-        chart.scale('score', {
-            min: 0,
-            max: 80,
-        });
+        // chart.scale('score', {
+        //     min: 0,
+        //     max: 80,
+        // });
         chart.coordinate('polar', {
             radius: 0.8,
         });
@@ -106,7 +82,12 @@ export function RadarComponent(props: RadarComponentProps) {
             .area()
             .position('item*score')
             .color('user');
-        chart.render();
+        // chart.render();
+
+        autorun(() => {
+            chart.data(props.store.data);
+            chart.render();
+        })
 
         return () => {
         }

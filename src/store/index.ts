@@ -1,6 +1,8 @@
-import { CascaderOptionType } from "antd/lib/cascader";
-import { configure, flow, makeObservable, observable, when } from "mobx";
+import DataSet from "@antv/data-set";
+import { getReferencePart } from "@jeltemx/mendix-react-widget-utils";
+import { computed, configure, makeObservable, observable, when } from "mobx";
 import { RadarContainerProps } from "../../typings/RadarProps";
+import { RadarLegend } from "./objects/OptionItem";
 
 configure({ enforceActions: "observed", isolateGlobalState: true, useProxies: "never" });
 
@@ -12,7 +14,8 @@ export class Store {
     public dispose() {}
 
     constructor(public mxOption: RadarContainerProps) {
-        makeObservable(this, { options: observable, load: flow.bound });
+        makeObservable(this, { mxOption: observable, legends: observable, legendMap: observable, data: computed });
+        this.categorizes = mxOption.objectCategorizes.map(d => d.Title);
 
         when(
             () => !!this.mxOption.mxObject,
@@ -41,49 +44,42 @@ export class Store {
             }
         );
     }
+    legendMap = new Map<string, RadarLegend>();
+    legends: RadarLegend[] = [];
+    categorizes: string[];
+    public get data(): any[] {
+        const rawData = this.categorizes.map((item, idxCategorize) => {
+            const dateItem: any = { item };
+            this.legends.forEach((v, idxLegend) => {
+                dateItem[idxLegend.toString()] = v.items[idxCategorize].value;
+            });
+            return dateItem;
+        });
+
+        const { DataView } = DataSet;
+        const dv = new DataView().source(rawData);
+        dv.transform({
+            type: "fold",
+            fields: this.legends.map((_, idx) => idx.toString()), // 展开字段集
+            key: "user", // key字段
+            value: "score" // value字段
+        });
+
+        return dv.rows;
+    }
+
     update() {
-        throw new Error("Method not implemented.");
+        const legendGuids = this.mxOption.mxObject!.getReferences(
+            getReferencePart(this.mxOption.entityLegend, "referenceAttr")
+        );
+        legendGuids.forEach(guid => {
+            if (!this.legendMap.has(guid)) {
+                this.legendMap.set(guid, new RadarLegend(guid, this.mxOption));
+            }
+        });
+        this.legends = legendGuids.map(d => this.legendMap.get(d)!);
     }
     drawSelection() {
         throw new Error("Method not implemented.");
-    }
-
-    public options: CascaderOptionType[] | undefined = [
-        {
-            value: "zhejiang",
-            label: "Zhejiang",
-            isLeaf: false
-        },
-        {
-            value: "jiangsu",
-            label: "Jiangsu",
-            isLeaf: false
-        }
-    ];
-
-    *load(selectedOptions?: CascaderOptionType[]) {
-        if (!selectedOptions) {
-            return;
-        }
-        const targetOption = selectedOptions[selectedOptions.length - 1];
-        targetOption.loading = true;
-
-        targetOption.children = yield new Promise<CascaderOptionType[]>((resolve, _reject) => {
-            setTimeout(() => {
-                resolve([
-                    {
-                        label: `${targetOption.label} Dynamic 1`,
-                        value: "dynamic1"
-                    },
-                    {
-                        label: `${targetOption.label} Dynamic 2`,
-                        value: "dynamic2"
-                    }
-                ]);
-            }, 1000);
-        });
-
-        targetOption.loading = false;
-        this.options = [...this.options!];
     }
 }
