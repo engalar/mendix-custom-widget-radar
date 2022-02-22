@@ -1,12 +1,12 @@
-import { createElement, useEffect, useMemo, useState } from "react";
+import { createElement, useEffect, useMemo } from "react";
 
-import { CascaderContainerProps } from "../typings/CascaderProps";
+import { RadarContainerProps } from "../typings/RadarProps";
 
-import "./ui/Cascader.scss";
+import "./ui/index.scss";
 
 import { Observer } from "mobx-react";
 import { Store } from "./store";
-import { CascaderComponent } from "./components/CascaderComponent";
+import { RadarComponent } from "./components/RadarComponent";
 import { useUnmount } from "ahooks";
 
 const parseStyle = (style = ""): { [key: string]: string } => {
@@ -24,7 +24,7 @@ const parseStyle = (style = ""): { [key: string]: string } => {
     }
 };
 
-export default function Cascader(props: CascaderContainerProps) {
+export default function Radar(props: RadarContainerProps) {
     const store = useMemo(() => new Store(props), []);
 
     useEffect(() => {
@@ -39,6 +39,6 @@ export default function Cascader(props: CascaderContainerProps) {
 
     return <Observer>{() =>
         <div style={parseStyle(props.style)}>
-            <CascaderComponent store={store} />
+            <RadarComponent store={store} />
         </div>}</Observer>;
 }
