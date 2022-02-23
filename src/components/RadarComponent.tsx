@@ -82,9 +82,36 @@ export function RadarComponent(props: RadarComponentProps) {
             .area()
             .position('item*score')
             .color('user');
-        // chart.render();
+
+        chart.on('legend-item:click', (ev: any) => {
+            const target = ev.target;
+            const delegateObject = target.get('delegateObject');
+            const item = delegateObject.item;
+
+            let showLegend: any[] = [];
+            for (let i = 0; i < delegateObject.legend.get('items').length; i++) {
+                if (!delegateObject.legend.get('items')[i].unchecked) {
+                    showLegend.push(delegateObject.legend.get('items')[i].id);
+                }
+            }
+            showLegend = [...showLegend];
+            chart.filter(item.value, (value) => {
+                if (value === undefined) {
+                    return true;
+                } else {
+                    return showLegend.includes(value);
+                }
+            });
+            chart.changeData(props.store.data);
+        });
 
         autorun(() => {
+            chart.legend({
+                position: 'bottom',
+                custom: true,
+                items: props.store.legendCfg,
+            });
+
             chart.data(props.store.data);
             chart.render();
         })

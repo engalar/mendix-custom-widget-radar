@@ -24,9 +24,10 @@ export class OptionItem extends BaseMxObject {
 
 export class RadarLegend extends BaseMxObject {
     items: OptionItem[] = [];
+    label: string = "";
     constructor(guid: string, private option: _W) {
         super(guid);
-        makeObservable(this, { items: observable });
+        makeObservable(this, { items: observable, label: observable });
         this.update();
     }
     update() {
@@ -34,6 +35,7 @@ export class RadarLegend extends BaseMxObject {
             this.items = this.mxObject
                 .getReferences(getReferencePart(this.option.entityItem, "referenceAttr"))
                 .map(guid => new OptionItem(guid, this.option));
+            this.label = this.mxObject.get(this.option.attrLegend) as string;
         } else {
         }
     }

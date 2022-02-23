@@ -47,6 +47,11 @@ export class Store {
     legendMap = new Map<string, RadarLegend>();
     legends: RadarLegend[] = [];
     categorizes: string[];
+
+    public get legendCfg(): any {
+        return this.legends.map((v, i) => ({ name: v.label, id: i.toString(), value: "user" }));
+    }
+
     public get data(): any[] {
         const rawData = this.categorizes.map((item, idxCategorize) => {
             const dateItem: any = { item };
